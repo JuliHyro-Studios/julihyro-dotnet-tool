@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/edition/console-app/dotnettool/dotnettool.csproj" />
+  <Project Path="src/shared-platform/shared-platform.csproj" />
+</Solution>

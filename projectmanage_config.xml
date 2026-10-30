@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ProjectManageConfig version="1">
+  <Paths>
+    <SourceDirectory>src</SourceDirectory>
+    <SlnFile>dotnet-tool.sln</SlnFile>
+    <SlnxFile>dotnet-tool.slnx</SlnxFile>
+  </Paths>
+  <Solution>
+    <ProjectTypeGuid>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuid>
+    <VisualStudioVersion>17.0.31903.59</VisualStudioVersion>
+    <MinimumVisualStudioVersion>10.0.40219.1</MinimumVisualStudioVersion>
+    <SolutionFormatVersion>12.00</SolutionFormatVersion>
+    <Platform>Any CPU</Platform>
+    <DefaultConfigurations>
+      <Configuration>Debug</Configuration>
+      <Configuration>Release</Configuration>
+    </DefaultConfigurations>
+  </Solution>
+  <Console>
+    <Messages>
+      <MainTitle>Project Solution Manager</MainTitle>
+      <SectionSeparator>==========================================================</SectionSeparator>
+      <InvalidSelection>Invalid selection. Choose: {0}.</InvalidSelection>
+      <NoProjects>No C# project files were found.</NoProjects>
+      <ProjectListItem>[{0}] {1}</ProjectListItem>
+      <MultipleProjectMatches>Multiple matching projects were found. Select the required project.</MultipleProjectMatches>
+      <GenerateOne>1. Generate one solution file (choose SLN or SLNX)</GenerateOne>
+      <GenerateBoth>2. Generate both SLN and SLNX</GenerateBoth>
+      <FormatSln>1. SLN</FormatSln>
+      <FormatSlnx>2. SLNX</FormatSlnx>
+      <GenerationCompleted>Generation completed for {0} project(s).</GenerationCompleted>
+      <NoCsproj>No .csproj files were found under {0}.</NoCsproj>
+      <InsertSlnx>1. Insert into SLNX</InsertSlnx>
+      <InsertSln>2. Insert into SLN</InsertSln>
+      <AlreadyReferenced>Every project under {0} is already referenced by {1}.</AlreadyReferenced>
+      <ProjectsWillInsert>The following projects will be inserted:</ProjectsWillInsert>
+      <ProjectInsertItem>  + {0}</ProjectInsertItem>
+      <NoChangesMade>No changes were made.</NoChangesMade>
+      <InsertCompleted>Successfully inserted {0} project(s) into {1}.</InsertCompleted>
+      <SolutionNotFoundSkip>{0} was not found. Skipping it.</SolutionNotFoundSkip>
+      <UnavailableCount>{0}: {1} unavailable project reference(s).</UnavailableCount>
+      <UnavailableItem>  - {0} [{1}]</UnavailableItem>
+      <NoUnavailable>No unavailable project references were found.</NoUnavailable>
+      <RemoveSlnx>1. Remove unavailable references from SLNX</RemoveSlnx>
+      <RemoveSln>2. Remove unavailable references from SLN</RemoveSln>
+      <RemoveBoth>3. Remove unavailable references from both</RemoveBoth>
+      <RepairSummary>{0} will retain {1} project reference(s) and remove {2}.</RepairSummary>
+      <Repaired>{0} was repaired successfully.</Repaired>
+      <SkippedRepair>Skipped {0}. No changes were made to this file.</SkippedRepair>
+      <CheckSlnx>1. Check and repair SLNX</CheckSlnx>
+      <CheckSln>2. Check and repair SLN</CheckSln>
+      <CheckBoth>3. Check and repair both</CheckBoth>
+      <SolutionDoesNotExist>{0} does not exist. Skipping it.</SolutionDoesNotExist>
+      <ProjectOk>[OK] {0} -&gt; {1}</ProjectOk>
+      <MissingProjectPath>Missing project path: {0}</MissingProjectPath>
+      <ClosestMatches>Closest project matches found under {0}:</ClosestMatches>
+      <CandidateItem>[{0}] {1} | {2} | distance: {3}</CandidateItem>
+      <SkipReference>[0] Skip this reference</SkipReference>
+      <Unchanged>This reference was left unchanged.</Unchanged>
+      <InvalidUnchanged>Invalid selection. This reference was left unchanged.</InvalidUnchanged>
+      <ReplacementSelected>Replacement selected: {0}</ReplacementSelected>
+      <NoPathChanges>No path changes are required for {0}.</NoPathChanges>
+      <PathsUpdated>{0} paths were updated successfully.</PathsUpdated>
+      <ChangesDiscarded>Changes to {0} were discarded.</ChangesDiscarded>
+      <FixUnavailable>1. Fix unavailable project references</FixUnavailable>
+      <FixLocations>2. Fix project location paths</FixLocations>
+      <MainInsert>1. Insert New Project from {0}</MainInsert>
+      <MainFix>2. Fix Project Tool</MainFix>
+      <MainGenerate>3. Generate New SLN / SLNX</MainGenerate>
+      <MainExit>0. Exit</MainExit>
+      <Closed>Project Manager closed.</Closed>
+      <OperationFailed>Operation failed: {0}</OperationFailed>
+      <NoFurtherChanges>No further changes will be attempted in this operation.</NoFurtherChanges>
+      <Blank/>
+      <SectionTitleLine>  {0}</SectionTitleLine>
+      <GenerateSection>Generate New Solution Files</GenerateSection>
+      <InsertSection>Insert New Projects from {0}</InsertSection>
+      <FixUnavailableSection>Fix Unavailable Project References</FixUnavailableSection>
+      <FixLocationsSection>Fix Project Location Paths</FixLocationsSection>
+      <FixToolSection>Fix Project Tool</FixToolSection>
+    </Messages>
+    <Colors>
+      <SectionSeparator>DarkCyan</SectionSeparator>
+      <SectionTitle>Cyan</SectionTitle>
+      <InvalidSelection>Yellow</InvalidSelection>
+      <NoProjects>Yellow</NoProjects>
+      <GenerationCompleted>Green</GenerationCompleted>
+      <NoCsproj>Yellow</NoCsproj>
+      <AlreadyReferenced>Green</AlreadyReferenced>
+      <InsertCompleted>Green</InsertCompleted>
+      <SolutionNotFoundSkip>DarkYellow</SolutionNotFoundSkip>
+      <UnavailableItem>Yellow</UnavailableItem>
+      <NoUnavailable>Green</NoUnavailable>
+      <Repaired>Green</Repaired>
+      <SolutionDoesNotExist>DarkYellow</SolutionDoesNotExist>
+      <ProjectOk>Green</ProjectOk>
+      <MissingProjectPath>Yellow</MissingProjectPath>
+      <Unchanged>DarkYellow</Unchanged>
+      <InvalidUnchanged>Yellow</InvalidUnchanged>
+      <ReplacementSelected>Green</ReplacementSelected>
+      <PathsUpdated>Green</PathsUpdated>
+      <OperationFailed>Red</OperationFailed>
+      <NoFurtherChanges>Yellow</NoFurtherChanges>
+      <SectionTitleLine>Cyan</SectionTitleLine>
+    </Colors>
+    <Prompts>
+      <ChooseOperation>Choose an operation</ChooseOperation>
+      <SelectProjectMode>Select 1 for a single project or 2 for multiple projects</SelectProjectMode>
+      <ProjectNumber>Enter the project number</ProjectNumber>
+      <ProjectNumbers>Enter project numbers separated by commas (example: 1,3,4)</ProjectNumbers>
+      <ProjectName>Enter a project name or .csproj file name</ProjectName>
+      <GenerationMode>Choose a generation mode</GenerationMode>
+      <SelectProjectInput>Select 1 to scan and select project folders, or 2 to enter a project name</SelectProjectInput>
+      <SolutionFormat>Choose the solution format</SolutionFormat>
+      <TargetSolution>Choose the target solution</TargetSolution>
+      <ConfirmInsert>Insert {0} project(s) into {1}? 1=Yes, 2=No</ConfirmInsert>
+      <RepairTarget>Choose which solution file(s) to repair</RepairTarget>
+      <ConfirmRepair>Confirm changes to {0}? 1=Yes, 2=No</ConfirmRepair>
+      <InspectTarget>Choose the solution file(s) to inspect</InspectTarget>
+      <ReplacementSelection>Select a replacement for '{0}'</ReplacementSelection>
+      <RepairOperation>Choose a repair operation</RepairOperation>
+      <SaveRepairedPaths>Save the repaired paths to {0}? 1=Yes, 2=No</SaveRepairedPaths>
+      <ReturnToMenu>Press Enter to return to the main menu</ReturnToMenu>
+    </Prompts>
+  </Console>
+</ProjectManageConfig>
