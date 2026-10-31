@@ -1,14 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\shared-platform\shared-platform.csproj" />
-  </ItemGroup>
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AssemblyName>jh-dtm</AssemblyName>
+    <RootNamespace>JuliHyro.DotNetTool.ConsoleEdition</RootNamespace>
   </PropertyGroup>
-
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\shared-platform\shared-platform.csproj" />
+  </ItemGroup>
 </Project>

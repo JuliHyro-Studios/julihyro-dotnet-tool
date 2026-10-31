@@ -1,57 +1,29 @@
-﻿using shared_platform;
+using JuliHyro.DotNetTool.Shared.Security;
+using JuliHyro.DotNetTool.ConsoleEdition.Shells;
 
+namespace JuliHyro.DotNetTool.ConsoleEdition;
+
+/// <summary>
+/// Console-edition entry point. No shell is created before elevation succeeds.
+/// </summary>
 public static class Program
 {
-    public static void Main()
+    public static async Task<int> Main()
     {
-        List<ShellOption> options = new()
-        {
-            new ShellOption(
-                "Start",
-                () =>
-                {
-                    Console.WriteLine("Starting application...");
-                }
-            ),
-            new ShellOption(
-                "Settings",
-                () =>
-                {
-                    Console.WriteLine("Opening settings...");
-                }
-            ),
-            new ShellOption(
-                "About",
-                () =>
-                {
-                    Console.WriteLine("Application version 1.0");
-                }
-            ),
-            new ShellOption(
-                "Exit",
-                () =>
-                {
-                    Console.WriteLine("Exiting...");
-                }
-            ),
-        };
+        if (!AdministratorGuard.EnsureElevated())
+            return 1;
 
-        ShellOption? result = LibAPI.BuildShellPrompt(
-            title: "MY APPLICATION",
-            style: "========================",
-            desc: "Welcome to my shell application.",
-            prompt: "root@system:~$ ",
-            columns: 3,
-            options: options,
-            onReturn: selected =>
-            {
-                Console.WriteLine($"Selected option: {selected.Name}");
-            }
-        );
-
-        if (result != null)
+        try
         {
-            Console.WriteLine($"Returned: {result.Name}");
+            AdministratorGuard.DemandAdministrator("console startup");
+            using var shell = new MainShell();
+            await shell.RunAsync();
+            return 0;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"[FATAL] {ex.Message}");
+            return 1;
         }
     }
 }
