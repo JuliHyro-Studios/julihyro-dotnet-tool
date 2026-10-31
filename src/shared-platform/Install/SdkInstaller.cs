@@ -25,8 +25,14 @@ public sealed class SdkInstaller(HttpClient httpClient)
 
         try
         {
-            progress?.Invoke("[DOWNLOAD] Downloading the official SDK installer...");
-            await DownloadAsync(release.InstallerUri, tempFile, cancellationToken);
+            progress?.Invoke($"[DOWNLOAD] Source : {release.InstallerUri}");
+            progress?.Invoke($"[DOWNLOAD] Target : {tempFile}");
+            await DownloadAsync(
+                release.InstallerUri,
+                tempFile,
+                progress,
+                "Official SDK installer",
+                cancellationToken);
             AdministratorGuard.DemandAdministrator("before launching the default installer");
 
             using var process = Process.Start(
@@ -74,17 +80,15 @@ public sealed class SdkInstaller(HttpClient httpClient)
         var script = Path.Combine(Path.GetTempPath(), "dotnet-install.ps1");
         try
         {
-            progress?.Invoke("[DOWNLOAD] Downloading Microsoft's dotnet-install.ps1...");
+            progress?.Invoke("[DOWNLOAD] Source : https://dot.net/v1/dotnet-install.ps1");
+            progress?.Invoke($"[DOWNLOAD] Target : {script}");
 
-            using (var response = await httpClient.GetAsync(
-                "https://dot.net/v1/dotnet-install.ps1",
-                cancellationToken))
-            {
-                response.EnsureSuccessStatusCode();
-                await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-                await using var output = File.Create(script);
-                await stream.CopyToAsync(output, cancellationToken);
-            }
+            await DownloadAsync(
+                new Uri("https://dot.net/v1/dotnet-install.ps1"),
+                script,
+                progress,
+                "dotnet-install.ps1",
+                cancellationToken);
 
             AdministratorGuard.DemandAdministrator("before executing dotnet-install.ps1");
             var start = new ProcessStartInfo("powershell.exe")
@@ -183,16 +187,120 @@ public sealed class SdkInstaller(HttpClient httpClient)
     private async Task DownloadAsync(
         Uri uri,
         string destination,
+        Action<string>? progress,
+        string downloadLabel,
         CancellationToken cancellationToken)
     {
         using var response = await httpClient.GetAsync(
             uri,
             HttpCompletionOption.ResponseHeadersRead,
             cancellationToken);
+
         response.EnsureSuccessStatusCode();
 
+        var totalBytes = response.Content.Headers.ContentLength;
+        var directory = Path.GetDirectoryName(destination);
+
+        if (!string.IsNullOrWhiteSpace(directory))
+            Directory.CreateDirectory(directory);
+
         await using var source = await response.Content.ReadAsStreamAsync(cancellationToken);
-        await using var target = File.Create(destination);
-        await source.CopyToAsync(target, cancellationToken);
+        await using var target = new FileStream(
+            destination,
+            FileMode.Create,
+            FileAccess.Write,
+            FileShare.None,
+            bufferSize: 81920,
+            useAsync: true);
+
+        var buffer = new byte[81920];
+        long downloadedBytes = 0;
+        long lastReportedBytes = 0;
+        var stopwatch = Stopwatch.StartNew();
+        var reportInterval = TimeSpan.FromMilliseconds(500);
+
+        progress?.Invoke($"[DOWNLOAD] Stage: Connecting | {downloadLabel}");
+
+        while (true)
+        {
+            var read = await source.ReadAsync(buffer.AsMemory(0, buffer.Length), cancellationToken);
+            if (read == 0)
+                break;
+
+            await target.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
+            downloadedBytes += read;
+
+            if (stopwatch.Elapsed >= reportInterval ||
+                (totalBytes.HasValue && downloadedBytes >= totalBytes.Value))
+            {
+                var elapsedSeconds = Math.Max(stopwatch.Elapsed.TotalSeconds, 0.001);
+                var bytesPerSecond = (downloadedBytes - lastReportedBytes) / elapsedSeconds;
+                var speed = FormatDataSize(bytesPerSecond) + "/s";
+                var downloaded = FormatDataSize(downloadedBytes);
+
+                if (totalBytes is > 0)
+                {
+                    var percentage = Math.Clamp(
+                        downloadedBytes * 100d / totalBytes.Value,
+                        0d,
+                        100d);
+
+                    var total = FormatDataSize(totalBytes.Value);
+                    var bar = BuildProgressBar(percentage, 28);
+
+                    progress?.Invoke(
+                        $"[DOWNLOAD] {downloadLabel} {bar} {percentage,6:F2}% | " +
+                        $"{downloaded} / {total} | {speed}");
+                }
+                else
+                {
+                    progress?.Invoke(
+                        $"[DOWNLOAD] {downloadLabel} {downloaded} downloaded | " +
+                        $"{speed} | Total size: unknown");
+                }
+
+                lastReportedBytes = downloadedBytes;
+                stopwatch.Restart();
+            }
+        }
+
+        await target.FlushAsync(cancellationToken);
+
+        if (downloadedBytes == 0)
+            throw new InvalidOperationException(
+                $"The download of {downloadLabel} completed with an empty file.");
+
+        if (totalBytes.HasValue && downloadedBytes != totalBytes.Value)
+        {
+            throw new IOException(
+                $"The download of {downloadLabel} was incomplete. " +
+                $"Expected {totalBytes.Value} bytes but received {downloadedBytes} bytes.");
+        }
+
+        progress?.Invoke(
+            $"[DOWNLOAD] Stage: Completed | {downloadLabel} | " +
+            $"{FormatDataSize(downloadedBytes)} saved to {destination}");
+    }
+
+    private static string BuildProgressBar(double percentage, int width)
+    {
+        var filled = (int)Math.Round(percentage / 100d * width);
+        filled = Math.Clamp(filled, 0, width);
+        return "[" + new string('#', filled) + new string('-', width - filled) + "]";
+    }
+
+    private static string FormatDataSize(double bytes)
+    {
+        string[] units = ["B", "KB", "MB", "GB", "TB"];
+        var size = Math.Max(bytes, 0);
+        var unitIndex = 0;
+
+        while (size >= 1024d && unitIndex < units.Length - 1)
+        {
+            size /= 1024d;
+            unitIndex++;
+        }
+
+        return $"{size:F2} {units[unitIndex]}";
     }
 }

@@ -160,7 +160,7 @@ public sealed class MainShell : IDisposable
             await _installer.InstallCustomAsync(
                 release,
                 targetDirectory!,
-                message => Console.WriteLine(message));
+                message => ReportInstallProgress(message));
             EnvironmentVariableManager.RegisterUserRoot(targetDirectory!);
         }
         else
@@ -168,10 +168,22 @@ public sealed class MainShell : IDisposable
             Console.WriteLine("[INSTALL] Launching the official default installer...");
             var exitCode = await _installer.InstallDefaultAsync(
                 release,
-                message => Console.WriteLine(message));
-            if (exitCode != 0)
+                message => ReportInstallProgress(message));
+            if (exitCode == 1602)
+            {
+                Console.WriteLine("[CANCELLED] The installer was cancelled by the user.");
+                return;
+            }
+
+            if (exitCode == 3010)
+            {
+                Console.WriteLine("[SUCCESS] Installation completed. Windows requested a restart.");
+            }
+            else if (exitCode != 0)
+            {
                 throw new InvalidOperationException(
                     $"The official installer returned exit code {exitCode}.");
+            }
         }
 
         Console.ForegroundColor = ConsoleColor.Green;
@@ -649,6 +661,12 @@ public sealed class MainShell : IDisposable
                     .GetAwaiter()
                     .GetResult();
 
+                if (exitCode == 1602)
+                {
+                    Console.WriteLine("[CANCELLED] Windows Installer operation was cancelled. No success was reported.");
+                    return;
+                }
+
                 if (exitCode is not (0 or 3010))
                 {
                     throw new InvalidOperationException(
@@ -678,6 +696,19 @@ public sealed class MainShell : IDisposable
             return value[..width];
 
         return value[..(width - 3)] + "...";
+    }
+
+    private static void ReportInstallProgress(string message)
+    {
+        if (message.StartsWith("[DOWNLOAD]", StringComparison.Ordinal))
+        {
+            Console.Write("\\r" + message.PadRight(Math.Max(Console.WindowWidth - 1, message.Length)));
+            if (message.Contains("Stage: Completed", StringComparison.Ordinal))
+                Console.WriteLine();
+            return;
+        }
+
+        Console.WriteLine(message);
     }
 
     public void Dispose() => _http.Dispose();

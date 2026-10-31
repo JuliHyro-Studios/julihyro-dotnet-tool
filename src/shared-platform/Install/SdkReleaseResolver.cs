@@ -94,12 +94,12 @@ public sealed class SdkReleaseResolver(HttpClient httpClient)
 
         var detail = failures.Count == 0
             ? "No usable Microsoft release metadata endpoint was found."
-            : string.Join(Environment.NewLine, failures.Select(failure => $" - {failure}"));
+            : string.Join(System.Environment.NewLine, failures.Select(failure => $" - {failure}"));
 
         throw new InvalidOperationException(
             exactVersionRequested
-                ? $"Could not resolve SDK {input} from Microsoft's release metadata.{Environment.NewLine}{detail}"
-                : $"Could not resolve a Windows x64 SDK installer for .NET channel {channel}.{Environment.NewLine}{detail}");
+                ? $"Could not resolve SDK {input} from Microsoft's release metadata.{System.Environment.NewLine}{detail}"
+                : $"Could not resolve a Windows x64 SDK installer for .NET channel {channel}.{System.Environment.NewLine}{detail}");
     }
 
     private async Task<List<string>> FindChannelMetadataUrlsAsync(
