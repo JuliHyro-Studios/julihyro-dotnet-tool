@@ -4,11 +4,13 @@ using System.Security.Principal;
 namespace JuliHyro.DotNetTool.Shared.Security;
 
 /// <summary>
-/// Enforces the product's mandatory elevated-process policy.
-/// A denied UAC request is a hard stop; there is no unelevated fallback.
+/// Enforces the product's mandatory elevated-process policy without depending on a UI.
 /// </summary>
 public static class AdministratorGuard
 {
+    /// <summary>
+    /// Returns whether the current Windows process belongs to the Administrators group.
+    /// </summary>
     public static bool IsAdministrator()
     {
         if (!OperatingSystem.IsWindows())
@@ -20,40 +22,42 @@ public static class AdministratorGuard
     }
 
     /// <summary>
-    /// Relaunches this entry assembly with UAC when needed.
-    /// Returns false when elevation was denied or could not be started.
+    /// Attempts to relaunch the current application with UAC elevation.
+    /// No console output or other presentation behavior is performed here.
     /// </summary>
     public static bool EnsureElevated()
     {
         if (!OperatingSystem.IsWindows())
-        {
-            Console.Error.WriteLine("[FATAL] JH-DTM currently supports Windows only.");
             return false;
-        }
 
         if (IsAdministrator())
             return true;
 
         try
         {
-            var executable = Environment.ProcessPath;
-            var entry = Environment.GetCommandLineArgs().FirstOrDefault();
-            if (string.IsNullOrWhiteSpace(executable) || string.IsNullOrWhiteSpace(entry))
+            var executable = System.Environment.ProcessPath;
+            var arguments = System.Environment.GetCommandLineArgs();
+            var entry = arguments.FirstOrDefault();
+
+            if (string.IsNullOrWhiteSpace(executable) ||
+                string.IsNullOrWhiteSpace(entry))
                 return false;
 
             var start = new ProcessStartInfo(executable)
             {
                 UseShellExecute = true,
                 Verb = "runas",
-                WorkingDirectory = Environment.CurrentDirectory
+                WorkingDirectory = System.Environment.CurrentDirectory
             };
 
-            // For framework-dependent execution, the process path is dotnet.exe
-            // and the entry assembly must be passed as its first argument.
-            if (Path.GetFileNameWithoutExtension(executable).Equals("dotnet", StringComparison.OrdinalIgnoreCase))
+            if (Path.GetFileNameWithoutExtension(executable).Equals(
+                "dotnet",
+                StringComparison.OrdinalIgnoreCase))
+            {
                 start.ArgumentList.Add(entry);
+            }
 
-            foreach (var argument in Environment.GetCommandLineArgs().Skip(1))
+            foreach (var argument in arguments.Skip(1))
                 start.ArgumentList.Add(argument);
 
             using var elevated = Process.Start(start);
@@ -61,23 +65,24 @@ public static class AdministratorGuard
         }
         catch (System.ComponentModel.Win32Exception)
         {
-            Console.Error.WriteLine("[ACCESS DENIED] Administrator approval is required. JH-DTM is closing.");
+            // UAC was denied or the elevation request could not be started.
             return false;
         }
-        catch (Exception ex)
+        catch
         {
-            Console.Error.WriteLine($"[FATAL] Could not request elevation: {ex.Message}");
             return false;
         }
     }
 
     /// <summary>
-    /// Revalidates the current process token immediately before an operation.
-    /// This is a checkpoint, not a claim that elevation makes arbitrary code safe.
+    /// Revalidates the current process token immediately before a privileged operation.
     /// </summary>
     public static void DemandAdministrator(string checkpoint)
     {
         if (!IsAdministrator())
-            throw new UnauthorizedAccessException($"Security checkpoint failed: {checkpoint}. Administrator privileges are required.");
+        {
+            throw new UnauthorizedAccessException(
+                $"Security checkpoint failed: {checkpoint}. Administrator privileges are required.");
+        }
     }
 }

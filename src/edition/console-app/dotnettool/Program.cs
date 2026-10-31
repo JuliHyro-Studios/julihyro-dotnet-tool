@@ -4,14 +4,18 @@ using JuliHyro.DotNetTool.ConsoleEdition.Shells;
 namespace JuliHyro.DotNetTool.ConsoleEdition;
 
 /// <summary>
-/// Console-edition entry point. No shell is created before elevation succeeds.
+/// Console-edition entry point. The shell starts only after UAC elevation succeeds.
 /// </summary>
 public static class Program
 {
     public static async Task<int> Main()
     {
         if (!AdministratorGuard.EnsureElevated())
+        {
+            Console.Error.WriteLine(
+                "[FATAL] Administrator approval is required. JH-DTM is closing.");
             return 1;
+        }
 
         try
         {
