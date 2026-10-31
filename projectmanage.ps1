@@ -668,32 +668,60 @@ function Invoke-FixUnavailableProjects {
     }
 }
 
+
 function Get-LevenshteinDistance {
     param(
-        [Parameter(Mandatory)][string]$Left,
-        [Parameter(Mandatory)][string]$Right
+        [Parameter(Mandatory)]
+        [string]$Left,
+
+        [Parameter(Mandatory)]
+        [string]$Right
     )
 
     $a = $Left.ToLowerInvariant()
     $b = $Right.ToLowerInvariant()
-    $matrix = New-Object 'int[,]' ($a.Length + 1), ($b.Length + 1)
 
-    for ($i = 0; $i -le $a.Length; $i++) { $matrix[$i, 0] = $i }
-    for ($j = 0; $j -le $b.Length; $j++) { $matrix[0, $j] = $j }
+    $rows = $a.Length + 1
+    $columns = $b.Length + 1
 
-    for ($i = 1; $i -le $a.Length; $i++) {
-        for ($j = 1; $j -le $b.Length; $j++) {
+    $matrix = [int[,]]::new($rows, $columns)
+
+    for ($i = 0; $i -lt $rows; $i++) {
+        $matrix[$i, 0] = $i
+    }
+
+    for ($j = 0; $j -lt $columns; $j++) {
+        $matrix[0, $j] = $j
+    }
+
+    for ($i = 1; $i -lt $rows; $i++) {
+        for ($j = 1; $j -lt $columns; $j++) {
+
             $cost = 1
-            if ($a[$i - 1] -eq $b[$j - 1]) { $cost = 0 }
-            $deletion = $matrix[$i - 1, $j] + 1
-            $insertion = $matrix[$i, $j - 1] + 1
-            $substitution = $matrix[$i - 1, $j - 1] + $cost
-            $matrix[$i, $j] = [Math]::Min([Math]::Min($deletion, $insertion), $substitution)
+
+            if ($a[$i - 1] -eq $b[$j - 1]) {
+                $cost = 0
+            }
+
+            $previousRow = $i - 1
+            $previousColumn = $j - 1
+
+            $deletion = [int]$matrix[$previousRow, $j] + 1
+            $insertion = [int]$matrix[$i, $previousColumn] + 1
+            $substitution = [int]$matrix[$previousRow, $previousColumn] + $cost
+
+            $minimum = [Math]::Min(
+                [Math]::Min($deletion, $insertion),
+                $substitution
+            )
+
+            $matrix[$i, $j] = [int]$minimum
         }
     }
 
-    return $matrix[$a.Length, $b.Length]
+    return [int]$matrix[$a.Length, $b.Length]
 }
+
 
 function Invoke-FixProjectLocation {
     Write-Section (Get-ConfigValue -Section 'Console/Messages' -Key 'FixLocationsSection')
